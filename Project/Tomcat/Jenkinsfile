@@ -61,6 +61,7 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
+
             environment {
                 scannerHome = tool 'SONAR_SCANNER'
             }
@@ -69,15 +70,26 @@ pipeline {
                 echo 'Running SonarQube Static Code Analysis'
 
                 withSonarQubeEnv('SONAR_HOME') {
-                    sh '''
-                        ${scannerHome}/bin/sonar-scanner
-                    '''
+
+                    withCredentials([
+                        string(
+                            credentialsId: 'sonar-token',
+                            variable: 'SONAR_TOKEN'
+                        )
+                    ]) {
+
+                        sh '''
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.token=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
 
         stage('JFrog Artifact Upload') {
             steps {
+
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'jfrog-credentials',
@@ -97,6 +109,7 @@ pipeline {
 
         stage('Tomcat Deployment') {
             steps {
+
                 deploy(
                     adapters: [
                         tomcat9(
