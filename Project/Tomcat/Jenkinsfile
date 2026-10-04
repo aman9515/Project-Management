@@ -77,6 +77,32 @@ pipeline {
             }
         }
 
+        stage('Check Sonar User') {
+            steps {
+                echo 'Checking SonarQube User Associated With Jenkins Token'
+
+                withCredentials([
+                    string(
+                        credentialsId: 'sonar-token',
+                        variable: 'SONAR_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        echo "SonarQube Authentication:"
+                        curl -sS -u "$SONAR_TOKEN:" \
+                        "http://3.26.209.59:9000/api/authentication/validate"
+
+                        echo ""
+                        echo "SonarQube User:"
+                        curl -sS -u "$SONAR_TOKEN:" \
+                        "http://3.26.209.59:9000/api/users/current"
+
+                        echo ""
+                    '''
+                }
+            }
+        }
+
         stage('Static Code Analysis') {
             environment {
                 scannerHome = tool 'SONAR_SCANNER'
