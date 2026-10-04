@@ -1,5 +1,4 @@
 pipeline {
-
     agent {
         node {
             label 'slave_1'
@@ -57,6 +56,24 @@ pipeline {
 
                     mv target/simple-maven-project.war target/webapp.war
                 '''
+            }
+        }
+
+        stage('Test Sonar Token') {
+            steps {
+                echo 'Testing SonarQube Token Authentication'
+
+                withCredentials([
+                    string(
+                        credentialsId: 'sonar-token',
+                        variable: 'SONAR_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        curl -sS -u "$SONAR_TOKEN:" \
+                        "http://3.26.209.59:9000/api/authentication/validate"
+                    '''
+                }
             }
         }
 
