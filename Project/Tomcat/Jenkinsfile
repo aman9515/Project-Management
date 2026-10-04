@@ -61,7 +61,6 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-
             environment {
                 scannerHome = tool 'SONAR_SCANNER'
             }
@@ -80,6 +79,7 @@ pipeline {
 
                         sh '''
                             ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.host.url=http://3.26.209.59:9000 \
                             -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
@@ -101,7 +101,7 @@ pipeline {
                     sh '''
                         curl -u "$JFROG_USER:$JFROG_PASSWORD" \
                         -T target/webapp.war \
-                        "http://13.239.254.218:8082/artifactory/local-snapshot-repo/simple-maven-project.war"
+                        "http://3.26.209.59:8082/artifactory/local-snapshot-repo/simple-maven-project.war"
                     '''
                 }
             }
@@ -115,7 +115,7 @@ pipeline {
                         tomcat9(
                             credentialsId: 'tomcat-credentials',
                             path: '',
-                            url: 'http://13.233.194.209:8080'
+                            url: 'http://3.26.209.59:8080'
                         )
                     ],
                     contextPath: '/ecommerce',
