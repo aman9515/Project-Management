@@ -13,93 +13,41 @@ pipeline {
 
     stages {
 
-        stage('Pre-Build Step') {
+        stage('Pre Build Step') {
             steps {
-                sh '''
-                    echo "Starting CI/CD Pipeline"
-                    echo "Build triggered successfully"
-                '''
+                echo 'Starting CI/CD Pipeline'
             }
         }
 
         stage('Git Checkout') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/aman9515/Project-Management.git'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/aman9515/Project-Management.git'
+                    ]]
+                ])
             }
         }
 
         stage('Build') {
             steps {
-                sh '''
-                    mvn clean package
-                '''
+                sh 'mvn clean package'
             }
         }
 
         stage('Unit Test') {
             steps {
                 echo 'Running Unit Tests'
-
-                sh '''
-                    mvn test
-                '''
+                sh 'mvn test'
             }
         }
 
-        stage('Update Local Repository') {
+        stage('Maven Install') {
             steps {
-                sh '''
-                    mvn install
-
-                    rm -f target/webapp.war
-
-                    mv target/simple-maven-project.war target/webapp.war
-                '''
-            }
-        }
-
-        stage('Test Sonar Token') {
-            steps {
-                echo 'Testing SonarQube Token Authentication'
-
-                withCredentials([
-                    string(
-                        credentialsId: 'sonar-token',
-                        variable: 'SONAR_TOKEN'
-                    )
-                ]) {
-                    sh '''
-                        curl -sS -u "$SONAR_TOKEN:" \
-                        "http://3.26.209.59:9000/api/authentication/validate"
-                    '''
-                }
-            }
-        }
-
-        stage('Check Sonar User') {
-            steps {
-                echo 'Checking SonarQube User Associated With Jenkins Token'
-
-                withCredentials([
-                    string(
-                        credentialsId: 'sonar-token',
-                        variable: 'SONAR_TOKEN'
-                    )
-                ]) {
-                    sh '''
-                        echo "SonarQube Authentication:"
-                        curl -sS -u "$SONAR_TOKEN:" \
-                        "http://3.26.209.59:9000/api/authentication/validate"
-
-                        echo ""
-                        echo "SonarQube User:"
-                        curl -sS -u "$SONAR_TOKEN:" \
-                        "http://3.26.209.59:9000/api/users/current"
-
-                        echo ""
-                    '''
-                }
+                sh 'mvn install'
             }
         }
 
@@ -111,27 +59,31 @@ pipeline {
             steps {
                 echo 'Running SonarQube Static Code Analysis'
 
-                withSonarQubeEnv('SONAR_HOME') {
-
-                    withCredentials([
-                        string(
-                            credentialsId: 'sonar-token',
-                            variable: 'SONAR_TOKEN'
-                        )
-                    ]) {
-
-                        sh '''
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.host.url=http://3.26.209.59:9000 \
-                            -Dsonar.token=$SONAR_TOKEN
-                        '''
-                    }
+                withCredentials([
+                    string(
+                        credentialsId: 'sonar-token',
+                        variable: 'SONAR_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.host.url=http://3.26.209.59:9000 \
+                        -Dsonar.projectKey=roshan:project \
+                        -Dsonar.projectName=roshan-project \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=src/main \
+                        -Dsonar.tests=src/test \
+                        -Dsonar.java.binaries=target/classes \
+                        -Dsonar.sourceEncoding=UTF-8 \
+                        -Dsonar.token=$SONAR_TOKEN
+                    '''
                 }
             }
         }
 
         stage('JFrog Artifact Upload') {
             steps {
+                echo 'Uploading WAR file to JFrog Artifactory'
 
                 withCredentials([
                     usernamePassword(
@@ -140,10 +92,9 @@ pipeline {
                         passwordVariable: 'JFROG_PASSWORD'
                     )
                 ]) {
-
                     sh '''
                         curl -u "$JFROG_USER:$JFROG_PASSWORD" \
-                        -T target/webapp.war \
+                        -T target/simple-maven-project.war \
                         "http://3.26.209.59:8082/artifactory/local-snapshot-repo/simple-maven-project.war"
                     '''
                 }
@@ -152,28 +103,24 @@ pipeline {
 
         stage('Tomcat Deployment') {
             steps {
+                echo 'Deploying WAR file to Tomcat'
 
-                deploy(
-                    adapters: [
-                        tomcat9(
-                            credentialsId: 'tomcat-credentials',
-                            path: '',
-                            url: 'http://3.26.209.59:8080'
-                        )
-                    ],
-                    contextPath: '/ecommerce',
-                    onFailure: false,
-                    war: 'target/webapp.war'
-                )
+                deploy adapters: [
+                    tomcat9(
+                        credentialsId: 'tomcat-key',
+                        path: '',
+                        url: 'http://3.26.209.59:8080'
+                    )
+                ],
+                contextPath: '/ecommerce',
+                onFailure: false,
+                war: 'target/simple-maven-project.war'
             }
         }
 
-        stage('Post-Build Step') {
+        stage('Post Build Step') {
             steps {
-                sh '''
-                    echo "Successful CI/CD Pipeline"
-                    echo "Application deployed to Tomcat successfully"
-                '''
+                echo 'Successfully completed CI/CD Pipeline'
             }
         }
     }
