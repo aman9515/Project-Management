@@ -67,7 +67,7 @@ pipeline {
                 ]) {
                     sh '''
                         ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.host.url=http://54.79.18.48:8080 \
+                        -Dsonar.host.url=http://3.25.218.220:9000 \
                         -Dsonar.projectKey=roshan:project \
                         -Dsonar.projectName=roshan-project \
                         -Dsonar.projectVersion=1.0 \
@@ -109,7 +109,7 @@ pipeline {
                     tomcat9(
                         credentialsId: 'tomcat-key',
                         path: '',
-                        url: 'http://3.25.218.220'
+                        url: 'http://3.25.218.220:8080'
                     )
                 ],
                 contextPath: '/ecommerce',
