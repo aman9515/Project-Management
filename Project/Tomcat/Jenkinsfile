@@ -67,7 +67,7 @@ pipeline {
                 ]) {
                     sh '''
                         ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.host.url=http://3.26.209.59:9000 \
+                        -Dsonar.host.url=http://54.79.18.48:8080 \
                         -Dsonar.projectKey=roshan:project \
                         -Dsonar.projectName=roshan-project \
                         -Dsonar.projectVersion=1.0 \
@@ -95,7 +95,7 @@ pipeline {
                     sh '''
                         curl -u "$JFROG_USER:$JFROG_PASSWORD" \
                         -T target/simple-maven-project.war \
-                        "http://3.26.209.59:8082/artifactory/local-snapshot-repo/simple-maven-project.war"
+                        "http://3.25.218.220:8082/artifactory/local-snapshot-repo/simple-maven-project.war"
                     '''
                 }
             }
@@ -109,7 +109,7 @@ pipeline {
                     tomcat9(
                         credentialsId: 'tomcat-key',
                         path: '',
-                        url: 'http://3.26.209.59:8080'
+                        url: 'http://3.25.218.220'
                     )
                 ],
                 contextPath: '/ecommerce',
