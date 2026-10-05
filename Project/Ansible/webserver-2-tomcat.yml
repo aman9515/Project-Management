@@ -15,12 +15,12 @@
     command: tar xf /opt/tomcat/apache-tomcat-7.0.109.tar.gz -C /opt/tomcat/
  
   - name: Change Ownership and group of the Tomcat directory
-    file: path=/opt/tomcat/apache-tomcat-7.0.109 owner=jenkins group=jenkins mode=775 state=directory recurse=yes
+    file: path=/opt/tomcat/apache-tomcat-7.0.109 owner=ansible group=ansible mode=775 state=directory recurse=yes
  
   - name: Start Tomcat
     command: nohup /opt/tomcat/apache-tomcat-7.0.109/bin/startup.sh # Execute command even after you have exited from the shell prompt
     become: true
-    become_user: jenkins
+    become_user: ansible
   
   - name: Deploy the new WAR file to target servers
     copy: src=/var/lib/jenkins/webapp.war  dest=/opt/tomcat/apache-tomcat-7.0.109/webapps
