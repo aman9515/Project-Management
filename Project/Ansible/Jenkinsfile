@@ -46,7 +46,6 @@ pipeline {
         stage('Unit Test') {
             steps {
                 echo 'Running Unit Testing'
-
                 sh '''
                     mvn test
                 '''
@@ -62,13 +61,11 @@ pipeline {
         }
 
         stage('Static Code Analysis') {
-
             environment {
                 scannerHome = tool 'SONAR_SCANNER'
             }
 
             steps {
-
                 echo 'Running Static Code Analysis'
 
                 withSonarQubeEnv('SONAR_HOME') {
@@ -130,7 +127,7 @@ pipeline {
                         script {
                             sh '''
                                 ansible-playbook \
-                                -i /var/lib/jenkins/inventory \
+                                -i /etc/ansible/hosts \
                                 Project/Ansible/webserver-1-tomcat.yml \
                                 -vv
                             '''
@@ -150,7 +147,7 @@ pipeline {
                         script {
                             sh '''
                                 ansible-playbook \
-                                -i /var/lib/jenkins/inventory \
+                                -i /etc/ansible/hosts \
                                 Project/Ansible/webserver-2-tomcat.yml \
                                 -vv
                             '''
