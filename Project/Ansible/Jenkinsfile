@@ -11,19 +11,13 @@ pipeline {
         jdk 'JAVA_HOME'
     }
 
-    parameters {
-        choice(
-            name: 'Env_Name',
-            choices: ['DEV', 'PROD'],
-            description: 'Select deployment environment'
-        )
-    }
-
     stages {
 
-        stage('Pre-Build') {
+        stage('pre-build step') {
             steps {
-                echo 'Starting CI/CD Pipeline'
+                sh '''
+                    echo "Pre Build Step"
+                '''
             }
         }
 
@@ -35,23 +29,23 @@ pipeline {
                     extensions: [],
                     userRemoteConfigs: [[
                         credentialsId: '',
-                        url: 'https://github.com/devopscloudtrainer25/Project-Management.git'
+                        url: 'https://github.com/aman9515/Project-Management.git'
                     ]]
                 ])
             }
         }
 
-        stage('Build') {
+        stage('build') {
             steps {
                 sh '''
-                    mvn clean package -DskipTests
+                    mvn package
                 '''
             }
         }
 
         stage('Unit Test') {
             steps {
-                echo 'Running Unit Tests'
+                echo 'Running Unit Testing'
 
                 sh '''
                     mvn test
@@ -59,36 +53,55 @@ pipeline {
             }
         }
 
-        stage('Install to Local Repository') {
+        stage('Update Local Repository') {
             steps {
                 sh '''
-                    mvn install -DskipTests
+                    mvn install
                 '''
             }
         }
 
         stage('Static Code Analysis') {
+
             environment {
                 scannerHome = tool 'SONAR_SCANNER'
             }
 
             steps {
-                echo 'Running SonarQube Analysis'
+
+                echo 'Running Static Code Analysis'
 
                 withSonarQubeEnv('SONAR_HOME') {
-                    sh '''
-                        ${scannerHome}/bin/sonar-scanner
-                    '''
+
+                    withCredentials([
+                        string(
+                            credentialsId: 'sonar-token',
+                            variable: 'SONAR_TOKEN'
+                        )
+                    ]) {
+
+                        sh '''
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.host.url=http://3.25.218.220:9000 \
+                            -Dsonar.projectKey=roshan:project \
+                            -Dsonar.projectName=roshan-project \
+                            -Dsonar.projectVersion=1.0 \
+                            -Dsonar.sources=src/main \
+                            -Dsonar.tests=src/test \
+                            -Dsonar.java.binaries=target/classes \
+                            -Dsonar.sourceEncoding=UTF-8 \
+                            -Dsonar.token=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Upload Artifact to JFrog') {
+        stage('Jfrog Artifact Upload') {
             steps {
 
                 rtUpload(
                     serverId: 'artifactory',
-
                     spec: '''{
                         "files": [
                             {
@@ -101,53 +114,58 @@ pipeline {
             }
         }
 
-        stage('Deploy using Ansible') {
+        stage('Ansible Deployment') {
 
-            steps {
+            parallel {
 
-                script {
+                stage('Ansible Dev Deployment') {
 
-                    if (params.Env_Name == 'DEV') {
+                    when {
+                        expression {
+                            "$Env_Name" == 'DEV'
+                        }
+                    }
 
-                        echo 'Deploying application to DEV environment'
+                    steps {
+                        script {
+                            sh '''
+                                ansible-playbook \
+                                -i /var/lib/jenkins/inventory \
+                                Project/Ansible/webserver-1-tomcat.yml \
+                                -vv
+                            '''
+                        }
+                    }
+                }
 
-                        sh '''
-                            ansible-playbook \
-                            -i /var/lib/jenkins/inventory \
-                            Project/Ansible/webserver-1-tomcat.yml \
-                            -vv
-                        '''
+                stage('Ansible Prod Deployment') {
 
-                    } else if (params.Env_Name == 'PROD') {
+                    when {
+                        expression {
+                            "$Env_Name" == 'PROD'
+                        }
+                    }
 
-                        echo 'Deploying application to PROD environment'
-
-                        sh '''
-                            ansible-playbook \
-                            -i /var/lib/jenkins/inventory \
-                            Project/Ansible/webserver-2-tomcat.yml \
-                            -vv
-                        '''
+                    steps {
+                        script {
+                            sh '''
+                                ansible-playbook \
+                                -i /var/lib/jenkins/inventory \
+                                Project/Ansible/webserver-2-tomcat.yml \
+                                -vv
+                            '''
+                        }
                     }
                 }
             }
         }
 
-        stage('Post-Build') {
+        stage('post-build step') {
             steps {
-                echo 'Successful Pipeline'
+                sh '''
+                    echo "Successfull Pipeline"
+                '''
             }
-        }
-    }
-
-    post {
-
-        success {
-            echo 'CI/CD Pipeline completed successfully'
-        }
-
-        failure {
-            echo 'CI/CD Pipeline failed'
         }
     }
 }
