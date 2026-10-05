@@ -7,6 +7,9 @@
 
   - name: Make directory /opt/tomcat
     command: mkdir -p /opt/tomcat
+
+  - name: Install wget
+    yum: name=wget state=present
     
   - name: Download Tomcat
     command: wget -O /opt/tomcat/apache-tomcat-7.0.109.tar.gz https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.109/bin/apache-tomcat-7.0.109.tar.gz
