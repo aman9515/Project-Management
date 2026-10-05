@@ -39,6 +39,7 @@ pipeline {
             steps {
                 sh '''
                     mvn package
+                    cp target/simple-maven-project-1.0-SNAPSHOT.war /var/lib/jenkins/webapp.war
                 '''
             }
         }
