@@ -99,7 +99,7 @@ pipeline {
                     steps {
                         sh '''
                             ansible-playbook \
-                            -i /var/lib/jenkins/inventory \
+                            -i /etc/ansible/hosts \
                             Project/Ansible/webserver-1-tomcat.yml -vv
                         '''
                     }
@@ -112,7 +112,7 @@ pipeline {
                     steps {
                         sh '''
                             ansible-playbook \
-                            -i /var/lib/jenkins/inventory \
+                            -i /etc/ansible/hosts \
                             Project/Ansible/webserver-2-tomcat.yml -vv
                         '''
                     }
