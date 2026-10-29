@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -13,7 +12,7 @@
 
     <name>Freestyle Project</name>
     <description>Sample Maven project with a server and deployable web application.</description>
-    <url>https://www.example.com</url>
+    <url>https://github.com/aman9515/Project-Management</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,12 +35,13 @@
 
     <build>
         <plugins>
+            <!-- Updated Java compiler configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.1</version>
                 <configuration>
-                    <release>21</release>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
 
@@ -58,44 +58,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.0</version>
-                <configuration>
-                    <reportPlugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-checkstyle-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-jxr-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-pmd-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-report-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>findbugs-maven-plugin</artifactId>
-                        </plugin>
-
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>taglist-maven-plugin</artifactId>
-                        </plugin>
-                    </reportPlugins>
-                </configuration>
             </plugin>
         </plugins>
 
@@ -105,6 +67,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.14.1</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -233,10 +198,10 @@
     </dependencyManagement>
 
     <scm>
-        <connection>scm:git:git@github.com:jleetutorial/freestyle-project.git</connection>
-        <developerConnection>scm:git:git@github.com:jleetutorial/freestyle-project.git</developerConnection>
+        <connection>scm:git:https://github.com/aman9515/Project-Management.git</connection>
+        <developerConnection>scm:git:https://github.com/aman9515/Project-Management.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/jleetutorial/freestyle-project</url>
+        <url>https://github.com/aman9515/Project-Management</url>
     </scm>
 
     <prerequisites>
