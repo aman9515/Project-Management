@@ -68,7 +68,7 @@ pipeline{
          stage ('Docker Build') {
                  steps {
                     script {
-                      sh "docker build -t goudsagar/webapp-app-tomcat:latest -f Project/Docker-Kubernetes/Dockerfile ."
+                      sh "docker build -t amanroshan9515/webapp-app-tomcat:latest -f Project/Docker-Kubernetes/Dockerfile ."
                      }
                     } 
                 }
